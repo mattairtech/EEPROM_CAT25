@@ -1,0 +1,17 @@
+{
+  "name": "EEPROM_CAT25",
+  "keywords": "EEPROM, eeprom, CAT25, SPI, driver",
+  "description": "Driver for On Semiconductor CAT25 SPI EEPROM chips for AVR, SAM3X (Due), and SAM M0+ (SAMD, SAML, SAMC) microcontrollers",
+  "authors":
+  [
+  {
+	  "name": "Justin Mattair"
+  }
+  ],
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/MattairTech/EEPROM_CAT25.git"
+  },
+  "frameworks": "arduino"
+}
