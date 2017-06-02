@@ -217,14 +217,14 @@ void EEPROM_CAT25::startCommand(uint8_t command, const uint32_t address)
 void EEPROM_CAT25::sendAddressBytes(const uint32_t address)
 {
   if (_capacity > 0x10000) {
-    _spi->transfer(address & 0x00FF0000);
+    _spi->transfer((uint8_t)((address >> 16) & 0xFF));
   }
 
   if ((_capacity > 0x100) && (_device != CAT25040)) {
-    _spi->transfer(address & 0x0000FF00);
+    _spi->transfer((uint8_t)((address >> 8) & 0xFF));
   }
 
-  _spi->transfer(address & 0x000000FF);
+  _spi->transfer((uint8_t)(address & 0xFF));
 }
 
 void EEPROM_CAT25::endCommand(void)
