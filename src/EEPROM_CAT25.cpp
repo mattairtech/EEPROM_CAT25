@@ -105,6 +105,10 @@ uint8_t EEPROM_CAT25::readByte(const uint32_t address)
     return(0);
   }
 
+  while (!isReady()) {
+    yield();
+  }
+
   startCommand(EEPROM_CAT25_COMMAND_READ, address);
   uint8_t ret = _spi->transfer(EEPROM_CAT25_DUMMY_BYTE);
   endCommand();
@@ -118,10 +122,15 @@ size_t EEPROM_CAT25::writeByte(const uint32_t address, const uint8_t byte)
     return(0);
   }
 
+  while (!isReady()) {
+    yield();
+  }
+
   enableWrite();
   startCommand(EEPROM_CAT25_COMMAND_WRITE, address);
   _spi->transfer(byte);
   endCommand();
+
   return(1);
 }
 
@@ -129,6 +138,10 @@ size_t EEPROM_CAT25::readBlock(const uint32_t address, const size_t length, void
 {
   if (length == 0 || (length + address) > _capacity) {
     return(0);
+  }
+
+  while (!isReady()) {
+    yield();
   }
 
   startCommand(EEPROM_CAT25_COMMAND_READ, address);

@@ -95,10 +95,10 @@ typedef enum _EEPROM_CAT25_Device
 #define EEPROM_CAT25_COMMAND_WREN		0x06
 #define EEPROM_CAT25_COMMAND_WRDI		0x04
 
-/* The CAT25040/CAT25020/CAT25010 use 1 address byte, while
- * the larger EEPROMs use 2. The CAT25040 however, needs 9
- * bits, so bit position 3 of the READ or WRITE instrutions
- * is used as bit 8 of the address.
+/* The CAT25040/CAT25020/CAT25010 use 8 address bits, while the
+ * larger EEPROMs use 16 bits (or 24 bits for the 1MBit chips and above).
+ * The CAT25040 however, needs 9 bits, so bit position 3 of the
+ * READ or WRITE instrutions is used as the 9th bit of the address.
  */
 #define EEPROM_CAT25_COMMAND_READ_A8_HIGH	0x0B
 #define EEPROM_CAT25_COMMAND_WRITE_A8_HIGH	0x0A

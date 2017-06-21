@@ -67,7 +67,7 @@ EEPROM_CAT25 EEPROM(&SPI_PERIPHERAL, CHIP_SELECT_PIN, CAT25512);
 //uint8_t buffer[BUFFER_SIZE];
 //#define BUFFER_SIZE  320
 
-char buffer[] = "The MattairTech MT-D21E is a development board for the 32-pin Microchip / Atmel SAMx21E ARM Cortex M0+ microcontrollers. Choose between the D21E (general purpose M0+ MCU, USB, I2S, also used in the Arduino Zero), L21E (low power features, enhanced analog, USB, crypto/TRNG, custom logic), or C21E (5V support, MPU, 2x CAN instead of USB, Sigma-Delta and 2x SAR ADCs). Arduino 1.6.x compatible core files (1.6.x, 1.8.x IDE) for all 3 chips is provided.";
+char buffer[] = "The MattairTech MT-D21E is a development board for the 32-pin Microchip / Atmel SAMx21E ARM Cortex M0+ microcontrollers. Choose between the D21E, L21E, or C21E. Arduino compatible core files for all 3 chips is provided.";
 #define BUFFER_SIZE  (sizeof(buffer) / sizeof(uint8_t))
 
 // If using writePage(), you can set the buffer size to the page size by using the header file defines.
@@ -88,23 +88,8 @@ void loop(void)
 {
   while (!Serial); // Wait for serial monitor to connect
 
-  // Print buffer to serial monitor
-  Serial.print("Write Block: ");
-  for (size_t i=0; i < BUFFER_SIZE; i++) {
-    Serial.write(buffer[i]);
-  }
-  Serial.println();
-
-  // Write block
-  if (!EEPROM.writeBlock(START_ADDRESS, BUFFER_SIZE, buffer)) {
-    Serial.println("Write Block Failure");
-  }
-
-  // Clear buffer
-  memset(&buffer[0], 0, BUFFER_SIZE);
-
-  // Read Byte, print to serial monitor
-  Serial.print("Read Byte:  ");
+  // Initial Read Byte for previously written contents, print to serial monitor
+  Serial.print("Initial Read Byte:  ");
   for (size_t i=0; i < BUFFER_SIZE; i++) {
     buffer[i] = EEPROM.readByte(START_ADDRESS + i);
     Serial.write(buffer[i]);
@@ -134,5 +119,28 @@ void loop(void)
   }
   Serial.println();
 
-  delay(1000);
+  // Print buffer to serial monitor
+  Serial.print("Write Block: ");
+  for (size_t i=0; i < BUFFER_SIZE; i++) {
+    Serial.write(buffer[i]);
+  }
+  Serial.println();
+
+  // Write block
+  if (!EEPROM.writeBlock(START_ADDRESS, BUFFER_SIZE, buffer)) {
+    Serial.println("Write Block Failure");
+  }
+
+  // Clear buffer
+  memset(&buffer[0], 0, BUFFER_SIZE);
+
+  // Read Byte, print to serial monitor
+  Serial.print("Read Byte:  ");
+  for (size_t i=0; i < BUFFER_SIZE; i++) {
+    buffer[i] = EEPROM.readByte(START_ADDRESS + i);
+    Serial.write(buffer[i]);
+  }
+  Serial.println();
+
+  while(1);
 }
