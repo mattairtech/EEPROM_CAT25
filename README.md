@@ -178,6 +178,7 @@ bytes in order to maximize the number of write cycles (if needed).
 
 ## Changelog
 
+v1.0.1 - Fixed compilation error on avr architecture.
 v1.0.0 - Initial release.
 
 

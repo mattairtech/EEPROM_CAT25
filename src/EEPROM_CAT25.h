@@ -27,7 +27,6 @@
 #define EEPROM_CAT25_h_
 
 #include "Arduino.h"
-#include "wiring_digital.h"
 #include <SPI.h>
 #include <stdbool.h>
 
