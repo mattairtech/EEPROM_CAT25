@@ -178,13 +178,14 @@ bytes in order to maximize the number of write cycles (if needed).
 
 ## Changelog
 
+v1.0.2 - Fixed demo sketch (test string was not printing).
 v1.0.1 - Fixed compilation error on avr architecture.
 v1.0.0 - Initial release.
 
 
 ## License
 
-Copyright (c) 2017, Justin Mattair (justin@mattair.net)
+Copyright (c) 2017-2018, Justin Mattair (justin@mattair.net)
 
 Permission to use, copy, modify, and distribute this software
 and its documentation for any purpose and without fee is hereby

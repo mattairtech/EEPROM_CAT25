@@ -91,8 +91,7 @@ void loop(void)
   // Initial Read Byte for previously written contents, print to serial monitor
   Serial.print("Initial Read Byte:  ");
   for (size_t i=0; i < BUFFER_SIZE; i++) {
-    buffer[i] = EEPROM.readByte(START_ADDRESS + i);
-    Serial.write(buffer[i]);
+    Serial.write(EEPROM.readByte(START_ADDRESS + i));
   }
   Serial.println();
 

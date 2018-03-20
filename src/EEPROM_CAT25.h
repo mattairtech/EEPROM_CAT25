@@ -2,7 +2,7 @@
  * Driver for On Semiconductor CAT25 SPI EEPROM chips for
  * AVR, SAM3X (Due), and SAM M0+ (SAMD, SAML, SAMC) microcontrollers
  * 
- * Copyright (c) 2017, Justin Mattair (justin@mattair.net)
+ * Copyright (c) 2017-2018, Justin Mattair (justin@mattair.net)
  * 
  * Permission to use, copy, modify, and distribute this software
  * and its documentation for any purpose and without fee is hereby
