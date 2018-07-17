@@ -11,17 +11,17 @@ EEPROM_CAT25	KEYWORD1
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
-begin			KEYWORD2
-end			KEYWORD2
-readByte		KEYWORD2
-writeByte		KEYWORD2
-readBlock		KEYWORD2
-writeBlock		KEYWORD2
-writePage               KEYWORD2
-isReady                 KEYWORD2
-enableWrite             KEYWORD2
-disableWrite            KEYWORD2
-getStatusRegister       KEYWORD2
+begin	KEYWORD2
+end	KEYWORD2
+readByte	KEYWORD2
+writeByte	KEYWORD2
+readBlock	KEYWORD2
+writeBlock	KEYWORD2
+writePage	KEYWORD2
+isReady	KEYWORD2
+enableWrite	KEYWORD2
+disableWrite	KEYWORD2
+getStatusRegister	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
