@@ -1,7 +1,6 @@
 # EEPROM_CAT25
 
-Driver for standard SPI EEPROM chips for AVR, SAM3X (Due), and SAM M0+ (SAMD, SAML, SAMC)
-microcontrollers
+Arduino library for standard SPI EEPROM chips.
 
 
 ## Supported Chips
