@@ -212,7 +212,7 @@ void EEPROM_CAT25::startCommand(uint8_t command, const uint32_t address)
   _spi->beginTransaction(_spiSettings);
   digitalWrite(_chipSelect, LOW);
 
-  if (_device == CAT25040 && address >= 0x100) {
+  if (_capacity == 0x200 && address >= 0x100) {
     if (command == EEPROM_CAT25_COMMAND_READ) {
       command = EEPROM_CAT25_COMMAND_READ_A8_HIGH;
     } else if (command == EEPROM_CAT25_COMMAND_WRITE) {
@@ -233,7 +233,10 @@ void EEPROM_CAT25::sendAddressBytes(const uint32_t address)
     _spi->transfer((uint8_t)((address >> 16) & 0xFF));
   }
 
-  if ((_capacity > 0x100) && (_device != CAT25040)) {
+  // Note that 4kbit (0x200) EEPROMS need 9 bits, but put the upper bit
+  // in the command byte, so the second address byte is only used for
+  // 8kbit and larger.
+  if ((_capacity > 0x200)) {
     _spi->transfer((uint8_t)((address >> 8) & 0xFF));
   }
 
