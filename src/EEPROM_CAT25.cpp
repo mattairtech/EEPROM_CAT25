@@ -27,22 +27,8 @@
 
 EEPROM_CAT25::EEPROM_CAT25(SPIClass * spi, const uint8_t chipSelect, const EEPROM_CAT25_Device device)
 {
-  switch (device)
-  {
-    case CAT25M01: _capacity = EEPROM_CAPACITY_CAT25M01; _pageSize = EEPROM_PAGE_SIZE_CAT25M01; break;
-    case CAT25512: _capacity = EEPROM_CAPACITY_CAT25512; _pageSize = EEPROM_PAGE_SIZE_CAT25512; break;
-    case CAT25256: _capacity = EEPROM_CAPACITY_CAT25256; _pageSize = EEPROM_PAGE_SIZE_CAT25256; break;
-    case CAT25128: _capacity = EEPROM_CAPACITY_CAT25128; _pageSize = EEPROM_PAGE_SIZE_CAT25128; break;
-    case CAT25640: _capacity = EEPROM_CAPACITY_CAT25640; _pageSize = EEPROM_PAGE_SIZE_CAT25640; break;
-    case CAT25320: _capacity = EEPROM_CAPACITY_CAT25320; _pageSize = EEPROM_PAGE_SIZE_CAT25320; break;
-    case CAT25160: _capacity = EEPROM_CAPACITY_CAT25160; _pageSize = EEPROM_PAGE_SIZE_CAT25160; break;
-    case CAV25160: _capacity = EEPROM_CAPACITY_CAV25160; _pageSize = EEPROM_PAGE_SIZE_CAV25160; break;
-    case CAT25080: _capacity = EEPROM_CAPACITY_CAT25080; _pageSize = EEPROM_PAGE_SIZE_CAT25080; break;
-    case CAV25080: _capacity = EEPROM_CAPACITY_CAV25080; _pageSize = EEPROM_PAGE_SIZE_CAV25080; break;
-    case CAT25040: _capacity = EEPROM_CAPACITY_CAT25040; _pageSize = EEPROM_PAGE_SIZE_CAT25040; break;
-    case CAT25020: _capacity = EEPROM_CAPACITY_CAT25020; _pageSize = EEPROM_PAGE_SIZE_CAT25020; break;
-    case CAT25010: _capacity = EEPROM_CAPACITY_CAT25010; _pageSize = EEPROM_PAGE_SIZE_CAT25010; break;
-  }
+  _capacity = device.capacity;
+  _pageSize = device.pageSize;
   _spi = spi;
   _chipSelect = chipSelect;
   _spiSettings = SPISettings();	// use default settings

@@ -34,51 +34,25 @@
 #error "EEPROM_CAT25 library requires SPI library transaction support (SPI_HAS_TRANSACTION = 1)"
 #endif
 
+struct EEPROM_CAT25_Device {
+  size_t capacity;
+  size_t pageSize;
+};
 
-typedef enum _EEPROM_CAT25_Device
-{
-  CAT25M01=0,
-  CAT25512,
-  CAT25256,
-  CAT25128,
-  CAT25640,
-  CAT25320,
-  CAT25160,
-  CAV25160,
-  CAT25080,
-  CAV25080,
-  CAT25040,
-  CAT25020,
-  CAT25010,
-} EEPROM_CAT25_Device;
 
-#define EEPROM_CAPACITY_CAT25M01	0x20000
-#define EEPROM_CAPACITY_CAT25512	0x10000
-#define EEPROM_CAPACITY_CAT25256	0x8000
-#define EEPROM_CAPACITY_CAT25128	0x4000
-#define EEPROM_CAPACITY_CAT25640	0x2000
-#define EEPROM_CAPACITY_CAT25320	0x1000
-#define EEPROM_CAPACITY_CAT25160	0x800
-#define EEPROM_CAPACITY_CAV25160	0x800
-#define EEPROM_CAPACITY_CAT25080	0x400
-#define EEPROM_CAPACITY_CAV25080	0x400
-#define EEPROM_CAPACITY_CAT25040	0x200
-#define EEPROM_CAPACITY_CAT25020	0x100
-#define EEPROM_CAPACITY_CAT25010	0x80
-
-#define EEPROM_PAGE_SIZE_CAT25M01	256
-#define EEPROM_PAGE_SIZE_CAT25512	128
-#define EEPROM_PAGE_SIZE_CAT25256	64
-#define EEPROM_PAGE_SIZE_CAT25128	64
-#define EEPROM_PAGE_SIZE_CAT25640	64
-#define EEPROM_PAGE_SIZE_CAT25320	32
-#define EEPROM_PAGE_SIZE_CAT25160	32
-#define EEPROM_PAGE_SIZE_CAV25160	32
-#define EEPROM_PAGE_SIZE_CAT25080	32
-#define EEPROM_PAGE_SIZE_CAV25080	32
-#define EEPROM_PAGE_SIZE_CAT25040	16
-#define EEPROM_PAGE_SIZE_CAT25020	16
-#define EEPROM_PAGE_SIZE_CAT25010	16
+const EEPROM_CAT25_Device CAT25M01 = { .capacity = 0x20000, .pageSize = 256};
+const EEPROM_CAT25_Device CAT25512 = { .capacity = 0x10000, .pageSize = 128};
+const EEPROM_CAT25_Device CAT25256 = { .capacity = 0x8000,  .pageSize = 64};
+const EEPROM_CAT25_Device CAT25128 = { .capacity = 0x4000,  .pageSize = 64};
+const EEPROM_CAT25_Device CAT25640 = { .capacity = 0x2000,  .pageSize = 64};
+const EEPROM_CAT25_Device CAT25320 = { .capacity = 0x1000,  .pageSize = 32};
+const EEPROM_CAT25_Device CAT25160 = { .capacity = 0x800,   .pageSize = 32};
+const EEPROM_CAT25_Device CAV25160 = { .capacity = 0x800,   .pageSize = 32};
+const EEPROM_CAT25_Device CAT25080 = { .capacity = 0x400,   .pageSize = 32};
+const EEPROM_CAT25_Device CAV25080 = { .capacity = 0x400,   .pageSize = 32};
+const EEPROM_CAT25_Device CAT25040 = { .capacity = 0x200,   .pageSize = 16};
+const EEPROM_CAT25_Device CAT25020 = { .capacity = 0x100,   .pageSize = 16};
+const EEPROM_CAT25_Device CAT25010 = { .capacity = 0x80,    .pageSize = 16};
 
 // Maximum write time in milliseconds
 #define EEPROM_CAT25_MAX_WRITE_TIME_MS		5
