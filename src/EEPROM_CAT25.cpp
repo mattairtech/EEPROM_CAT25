@@ -43,8 +43,6 @@ EEPROM_CAT25::EEPROM_CAT25(SPIClass * spi, const uint8_t chipSelect, const EEPRO
     case CAT25020: _capacity = EEPROM_CAPACITY_CAT25020; _pageSize = EEPROM_PAGE_SIZE_CAT25020; break;
     case CAT25010: _capacity = EEPROM_CAPACITY_CAT25010; _pageSize = EEPROM_PAGE_SIZE_CAT25010; break;
   }
-
-  _device = device;
   _spi = spi;
   _chipSelect = chipSelect;
   _spiSettings = SPISettings();	// use default settings

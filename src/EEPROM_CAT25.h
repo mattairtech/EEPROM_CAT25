@@ -203,7 +203,6 @@ class EEPROM_CAT25
   private:
     SPIClass * _spi;
     SPISettings _spiSettings;
-    EEPROM_CAT25_Device _device;
     size_t _capacity;
     size_t _pageSize;
     uint8_t _chipSelect;
