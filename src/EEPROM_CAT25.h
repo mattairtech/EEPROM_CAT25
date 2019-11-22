@@ -39,7 +39,8 @@ struct EEPROM_CAT25_Device {
   size_t pageSize;
 };
 
-
+// On semi
+const EEPROM_CAT25_Device CAT25M02 = { .capacity = 0x40000, .pageSize = 256};
 const EEPROM_CAT25_Device CAT25M01 = { .capacity = 0x20000, .pageSize = 256};
 const EEPROM_CAT25_Device CAT25512 = { .capacity = 0x10000, .pageSize = 128};
 const EEPROM_CAT25_Device CAT25256 = { .capacity = 0x8000,  .pageSize = 64};
@@ -53,6 +54,23 @@ const EEPROM_CAT25_Device CAV25080 = { .capacity = 0x400,   .pageSize = 32};
 const EEPROM_CAT25_Device CAT25040 = { .capacity = 0x200,   .pageSize = 16};
 const EEPROM_CAT25_Device CAT25020 = { .capacity = 0x100,   .pageSize = 16};
 const EEPROM_CAT25_Device CAT25010 = { .capacity = 0x80,    .pageSize = 16};
+
+// ST
+// M95M04 has a 5ms write time, except for LID instruction. To be safe,
+// use 11ms timeout on everything.
+const EEPROM_CAT25_Device M95M04 = { .capacity = 0x80000, .pageSize = 512};
+const EEPROM_CAT25_Device M95M02 = { .capacity = 0x40000, .pageSize = 256};
+const EEPROM_CAT25_Device M95M01 = { .capacity = 0x20000, .pageSize = 256};
+const EEPROM_CAT25_Device M95512 = { .capacity = 0x10000, .pageSize = 128};
+const EEPROM_CAT25_Device M95256 = { .capacity = 0x8000,  .pageSize = 64};
+const EEPROM_CAT25_Device M95128 = { .capacity = 0x4000,  .pageSize = 64};
+const EEPROM_CAT25_Device M95640 = { .capacity = 0x2000,  .pageSize = 32};
+const EEPROM_CAT25_Device M95320 = { .capacity = 0x1000,  .pageSize = 32};
+const EEPROM_CAT25_Device M95160 = { .capacity = 0x800,   .pageSize = 32};
+const EEPROM_CAT25_Device M95080 = { .capacity = 0x400,   .pageSize = 32};
+const EEPROM_CAT25_Device M95040 = { .capacity = 0x200,   .pageSize = 16};
+const EEPROM_CAT25_Device M95020 = { .capacity = 0x100,   .pageSize = 16};
+const EEPROM_CAT25_Device M95010 = { .capacity = 0x80,    .pageSize = 16};
 
 // Maximum write time in milliseconds. Most chips have max 5ms write
 // time, but some (especially larger ones like M95M02) have 10ms. To

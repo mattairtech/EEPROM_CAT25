@@ -18,6 +18,7 @@ Arduino library for standard SPI EEPROM chips.
 * CAT25040 (512B, 16B page)
 * CAT25020 (256B, 16B page)
 * CAT25010 (128B, 16B page)
+* ST M95xxx range
 
 Other compatible chips can also be supported, see below.
 
