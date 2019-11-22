@@ -152,7 +152,7 @@ typedef union {
 class EEPROM_CAT25
 {
   public:
-    EEPROM_CAT25(SPIClass * spi, const uint8_t chipSelect, const EEPROM_CAT25_Device device);
+    EEPROM_CAT25(SPIClass * const spi, const uint8_t chipSelect, const EEPROM_CAT25_Device device);
 
     void begin(void);
     void begin(const uint32_t clkSpeed);
@@ -166,9 +166,9 @@ class EEPROM_CAT25
     uint8_t readByte(const uint32_t address);
     size_t writeByte(const uint32_t address, const uint8_t byte);
 
-    size_t readBlock(const uint32_t address, const size_t length, void * buffer);
-    size_t writeBlock(uint32_t address, const size_t length, void * buffer);
-    size_t writePage(const uint32_t address, const size_t length, void * buffer);
+    size_t readBlock(const uint32_t address, const size_t length, void * const buffer);
+    size_t writeBlock(uint32_t address, const size_t length, const void * const buffer);
+    size_t writePage(const uint32_t address, const size_t length, const void * const buffer);
 
   protected:
     void startCommand(uint8_t command, const uint32_t address);

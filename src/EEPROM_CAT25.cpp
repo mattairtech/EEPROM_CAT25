@@ -25,7 +25,7 @@
 
 #include "EEPROM_CAT25.h"
 
-EEPROM_CAT25::EEPROM_CAT25(SPIClass * spi, const uint8_t chipSelect, const EEPROM_CAT25_Device device)
+EEPROM_CAT25::EEPROM_CAT25(SPIClass * const spi, const uint8_t chipSelect, const EEPROM_CAT25_Device device)
 {
   _capacity = device.capacity;
   _pageSize = device.pageSize;
@@ -118,7 +118,7 @@ size_t EEPROM_CAT25::writeByte(const uint32_t address, const uint8_t byte)
   return(1);
 }
 
-size_t EEPROM_CAT25::readBlock(const uint32_t address, const size_t length, void * buffer)
+size_t EEPROM_CAT25::readBlock(const uint32_t address, const size_t length, void * const buffer)
 {
   if (length == 0 || (length + address) > _capacity) {
     return(0);
@@ -135,9 +135,9 @@ size_t EEPROM_CAT25::readBlock(const uint32_t address, const size_t length, void
   return(length);
 }
 
-size_t EEPROM_CAT25::writeBlock(uint32_t address, const size_t length, void * buffer)
+size_t EEPROM_CAT25::writeBlock(uint32_t address, const size_t length, const void * const buffer)
 {
-  uint8_t *buf = reinterpret_cast<uint8_t *>(buffer);
+  const uint8_t *buf = reinterpret_cast<const uint8_t *>(buffer);
   size_t len = length;
 
   if (length == 0 || (length + address) > _capacity) {
@@ -167,9 +167,9 @@ size_t EEPROM_CAT25::writeBlock(uint32_t address, const size_t length, void * bu
   return(length);
 }
 
-size_t EEPROM_CAT25::writePage(const uint32_t address, const size_t length, void * buffer)
+size_t EEPROM_CAT25::writePage(const uint32_t address, const size_t length, const void * const buffer)
 {
-  uint8_t *buf = reinterpret_cast<uint8_t *>(buffer);
+  const uint8_t *buf = reinterpret_cast<const uint8_t *>(buffer);
   size_t len = length;
 
   if (address >= _capacity || length == 0 || length > (_pageSize - (address % _pageSize))) {
