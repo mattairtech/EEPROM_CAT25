@@ -89,7 +89,9 @@ uint8_t EEPROM_CAT25::readByte(const uint32_t address)
     return(0);
   }
 
-  waitForReady();
+  if (!waitForReady()) {
+    return(0);
+  }
 
   startCommand(EEPROM_CAT25_COMMAND_READ, address);
   uint8_t ret = _spi->transfer(EEPROM_CAT25_DUMMY_BYTE);
@@ -104,7 +106,9 @@ size_t EEPROM_CAT25::writeByte(const uint32_t address, const uint8_t byte)
     return(0);
   }
 
-  waitForReady();
+  if (!waitForReady()) {
+    return(0);
+  }
 
   enableWrite();
   startCommand(EEPROM_CAT25_COMMAND_WRITE, address);
@@ -120,7 +124,9 @@ size_t EEPROM_CAT25::readBlock(const uint32_t address, const size_t length, void
     return(0);
   }
 
-  waitForReady();
+  if (!waitForReady()) {
+    return(0);
+  }
 
   startCommand(EEPROM_CAT25_COMMAND_READ, address);
   _spi->transfer(buffer, length);
@@ -144,20 +150,26 @@ size_t EEPROM_CAT25::writeBlock(uint32_t address, const size_t length, const voi
   }
 
   if (remainderFirstPage) {
-    writePage(address, remainderFirstPage, buf);
+    if (!writePage(address, remainderFirstPage, buf)) {
+      return(0);
+    }
     buf += remainderFirstPage;
     len -= remainderFirstPage;
     address += remainderFirstPage;
   }
 
   while (len > _pageSize) {
-    writePage(address, _pageSize, buf);
+    if (!writePage(address, _pageSize, buf)) {
+      return(0);
+    }
     buf += _pageSize;
     len -= _pageSize;
     address += _pageSize;
   }
   if (len) {
-    writePage(address, len, buf);
+    if (!writePage(address, len, buf)) {
+      return(0);
+    }
   }
 
   return(length);
@@ -172,7 +184,9 @@ size_t EEPROM_CAT25::writePage(const uint32_t address, const size_t length, cons
     return(0);
   }
 
-  waitForReady();
+  if (!waitForReady()) {
+    return(0);
+  }
 
   enableWrite();
   startCommand(EEPROM_CAT25_COMMAND_WRITE, address);
@@ -227,9 +241,17 @@ void EEPROM_CAT25::endCommand(void)
   _spi->endTransaction();
 }
 
-void EEPROM_CAT25::waitForReady(void)
+bool EEPROM_CAT25::waitForReady(void)
 {
-  while (!isReady()) {
+  uint32_t start = micros();
+  uint32_t timeout = EEPROM_CAT25_TIMEOUT_TIME_MS * 1000;
+  while (true) {
+    if (isReady()) {
+      return(true);
+    }
+    if (micros() - start > timeout) {
+      return(false);
+    }
     yield();
   }
 }

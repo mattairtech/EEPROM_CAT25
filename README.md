@@ -83,6 +83,9 @@ while (!isReady()) {
 }
 ```
 
+All these methods implement a timeout while waiting for the ready flag: if the chip is
+not ready within 6ms (5ms write time plus some margin), the operation is aborted.
+
 Additionally, getStatusRegister() can be called to get the status register contents directly.
 See EEPROM_CAT25.h for register definitions.
 
@@ -109,8 +112,9 @@ disableWrite();
 
 ## Byte Transfers
 
-Call readByte with the address to read one byte. Returns 0 if address >= capacity.
-Because valid data could also be 0, use readBlock() to catch this error.
+Call readByte with the address to read one byte. Returns 0 if address >= capacity, or
+when a timeout occurred. Because valid data could also be 0, use readBlock() to catch
+this error.
 
 ```
 uint32_t address = 0x000A;
@@ -133,7 +137,7 @@ Call readBlock() with the address, length to read, and a pointer to the buffer u
 store the data read. Any length can be used, limited by the size of the buffer. If the length
 exceeds the last address, it will NOT wrap to address 0. Note that this method knows nothing about
 the size of the buffer used, so ensure length is not set too high or a buffer overflow will
-occur. Returns 0 if (length + address) > capacity or length = 0.
+occur. Returns 0 if (length + address) > capacity, if length = 0 or when a timeout occurred.
 
 ```
 #define START_ADDRESS   0x001A
@@ -148,9 +152,10 @@ for the data to be written. Any length can be used, limited by the size of the b
 length exceeds the last address, it will NOT wrap to address 0. Any address can be used within
 a page. Bytes within a page that are not written will be left unchanged. Note that this method
 knows nothing about the size of the buffer used, so ensure length is not set too high or data
-will be read past the end of the buffer. Returns 0 if (length + address) > capacity or
-length = 0. This method calls writePage() as many times as needed to transfer the entire block,
-but there are no address alignment considerations as writeBlock() handles this automatically.
+will be read past the end of the buffer. Returns 0 if (length + address) > capacity, if
+length = 0 or when a timeout occurred. This method calls writePage() as many times as
+needed to transfer the entire block, but there are no address alignment considerations as
+writeBlock() handles this automatically.
 
 ```
 size_t ret = EEPROM.writeBlock(START_ADDRESS, BUFFER_SIZE, buffer);
@@ -168,7 +173,8 @@ the page, it will NOT wrap to the beginning of the page. Any address can be used
 page. Bytes within a page that are not written will be left unchanged. Note that this method
 knows nothing about the size of the buffer used, so ensure length is not set too high or data
 will be read past the end of the buffer. Returns 0 if (length + address) > capacity,
-length = 0, or if writing past the last page address (on page size boundaries).
+if length = 0, if writing past the last page address (on page size boundaries) or when a
+timeout occurred.
 
 ```
 size_t ret = EEPROM.writePage(0x001A, 10, buffer);

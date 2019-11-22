@@ -54,8 +54,12 @@ const EEPROM_CAT25_Device CAT25040 = { .capacity = 0x200,   .pageSize = 16};
 const EEPROM_CAT25_Device CAT25020 = { .capacity = 0x100,   .pageSize = 16};
 const EEPROM_CAT25_Device CAT25010 = { .capacity = 0x80,    .pageSize = 16};
 
-// Maximum write time in milliseconds
-#define EEPROM_CAT25_MAX_WRITE_TIME_MS		5
+// Maximum write time in milliseconds. Most chips have max 5ms write
+// time, but some (especially larger ones like M95M02) have 10ms. To
+// allow using all of them, use a bigger timeout. This waits a bit
+// longer than needed on other chips, but since this should only be an
+// exception, that is ok.
+#define EEPROM_CAT25_MAX_WRITE_TIME_MS		10
 #define EEPROM_CAT25_TIMEOUT_TIME_MS		(EEPROM_CAT25_MAX_WRITE_TIME_MS + 1)
 
 #define EEPROM_CAT25_DUMMY_BYTE			0xFF
@@ -173,7 +177,7 @@ class EEPROM_CAT25
   protected:
     void startCommand(uint8_t command, const uint32_t address);
     void endCommand(void);
-    void waitForReady(void);
+    bool waitForReady(void);
 
   private:
     SPIClass * _spi;
