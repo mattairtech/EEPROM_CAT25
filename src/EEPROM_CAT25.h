@@ -173,6 +173,7 @@ class EEPROM_CAT25
   protected:
     void startCommand(uint8_t command, const uint32_t address);
     void endCommand(void);
+    void waitForReady(void);
 
   private:
     SPIClass * _spi;
