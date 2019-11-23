@@ -187,15 +187,20 @@ class EEPROM_CAT25
 
     uint8_t readByte(const uint32_t address);
     size_t writeByte(const uint32_t address, const uint8_t byte);
+    size_t updateByte(const uint32_t address, const uint8_t byte);
 
     size_t readBlock(const uint32_t address, const size_t length, void * const buffer);
     size_t writeBlock(uint32_t address, const size_t length, const void * const buffer);
+    size_t updateBlock(uint32_t address, const size_t length, const void * const buffer);
     size_t writePage(const uint32_t address, const size_t length, const void * const buffer);
+    size_t updatePage(const uint32_t address, const size_t length, const void * const buffer);
 
   protected:
     void startCommand(uint8_t command, const uint32_t address);
     void endCommand(void);
     bool waitForReady(void);
+    size_t writeOrUpdatePage(bool update, const uint32_t address, const size_t length, const void * const buffer);
+    size_t writeOrUpdateBlock(bool update, uint32_t address, const size_t length, const void * const buffer);
 
   private:
     SPIClass * _spi;

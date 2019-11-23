@@ -181,6 +181,18 @@ timeout occurred.
 size_t ret = EEPROM.writePage(0x001A, 10, buffer);
 ```
 
+## Only writing modified data
+The `writeByte`, `writeBlock` and `writePage` methods write the data to
+the EEPROM unconditionally. The `updateByte`, `updateBlock` and
+`updatePage` methods are equivalent, except that they first check
+whether the data is actually different before writing.
+
+This check is currently implemented per EEPROM page. For each page any
+unchanged bytes at the *start* of the page are skipped. Any unchanged
+bytes after the first changed bytes are written as normal. This approach
+ensures that pages that no additional write cycles are needed, at most
+one extra SPI read transaction per page, while still guaranteeing that
+any completely unchanged pages are skipped entirely.
 
 ## ECC
 

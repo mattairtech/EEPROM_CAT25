@@ -105,6 +105,11 @@ size_t EEPROM_CAT25::writeByte(const uint32_t address, const uint8_t byte)
   return writeBlock(address, sizeof(byte), &byte);
 }
 
+size_t EEPROM_CAT25::updateByte(const uint32_t address, const uint8_t byte)
+{
+  return updateBlock(address, sizeof(byte), &byte);
+}
+
 size_t EEPROM_CAT25::readBlock(const uint32_t address, const size_t length, void * const buffer)
 {
   if (length == 0 || (length + address) > _capacity) {
@@ -124,6 +129,16 @@ size_t EEPROM_CAT25::readBlock(const uint32_t address, const size_t length, void
 
 size_t EEPROM_CAT25::writeBlock(uint32_t address, const size_t length, const void * const buffer)
 {
+  return writeOrUpdateBlock(false, address, length, buffer);
+}
+
+size_t EEPROM_CAT25::updateBlock(uint32_t address, const size_t length, const void * const buffer)
+{
+  return writeOrUpdateBlock(true, address, length, buffer);
+}
+
+size_t EEPROM_CAT25::writeOrUpdateBlock(bool update, uint32_t address, const size_t length, const void * const buffer)
+{
   const uint8_t *buf = reinterpret_cast<const uint8_t *>(buffer);
   size_t len = length;
 
@@ -137,7 +152,7 @@ size_t EEPROM_CAT25::writeBlock(uint32_t address, const size_t length, const voi
   }
 
   if (remainderFirstPage) {
-    if (!writePage(address, remainderFirstPage, buf)) {
+    if (!writeOrUpdatePage(update, address, remainderFirstPage, buf)) {
       return(0);
     }
     buf += remainderFirstPage;
@@ -146,7 +161,7 @@ size_t EEPROM_CAT25::writeBlock(uint32_t address, const size_t length, const voi
   }
 
   while (len > _pageSize) {
-    if (!writePage(address, _pageSize, buf)) {
+    if (!writeOrUpdatePage(update, address, _pageSize, buf)) {
       return(0);
     }
     buf += _pageSize;
@@ -154,7 +169,7 @@ size_t EEPROM_CAT25::writeBlock(uint32_t address, const size_t length, const voi
     address += _pageSize;
   }
   if (len) {
-    if (!writePage(address, len, buf)) {
+    if (!writeOrUpdatePage(update, address, len, buf)) {
       return(0);
     }
   }
@@ -164,8 +179,19 @@ size_t EEPROM_CAT25::writeBlock(uint32_t address, const size_t length, const voi
 
 size_t EEPROM_CAT25::writePage(const uint32_t address, const size_t length, const void * const buffer)
 {
+  return writeOrUpdatePage(false, address, length, buffer);
+}
+
+size_t EEPROM_CAT25::updatePage(const uint32_t address, const size_t length, const void * const buffer)
+{
+  return writeOrUpdatePage(true, address, length, buffer);
+}
+
+size_t EEPROM_CAT25::writeOrUpdatePage(bool update, const uint32_t address, const size_t length, const void * const buffer)
+{
   const uint8_t *buf = reinterpret_cast<const uint8_t *>(buffer);
   size_t len = length;
+  uint32_t addr = address;
 
   if (address >= _capacity || length == 0 || length > (_pageSize - (address % _pageSize))) {
     return(0);
@@ -175,8 +201,39 @@ size_t EEPROM_CAT25::writePage(const uint32_t address, const size_t length, cons
     return(0);
   }
 
+  if (update) {
+    // To prevent writing bytes that are unchanged, read bytes and
+    // compare them, skipping any bytes that are unchanged. This only
+    // skips initial bytes. To skip all non-changed bytes, the page
+    // write might need to be split into multiple writes, which needs
+    // multiple write cycles so takes significantly longer (and, I
+    // guess, might even increase wear rather than decrease it?). You
+    // could also try to skip bytes from the end, which would not need
+    // an extra write cycle, but to do this efficiently, would require
+    // reading memory backwards, which the EEPROM does not support, or
+    // require reading all bytes to maybe discover the last one is
+    // changed and all should be written.
+    //
+    // Note that this does not use readBlock but runs the read command
+    // directly, to prevent allocating up to a full page of memory for
+    // the bytes read, and to allow ending the read as soon as we found
+    // a modified byte.
+    startCommand(EEPROM_CAT25_COMMAND_READ, address);
+    while (len) {
+      uint8_t value = _spi->transfer(0);
+      if (value != *buf)
+        break;
+      buf++;
+      addr++;
+      len--;
+    }
+    endCommand();
+    if (!len)
+      return(length);
+  }
+
   enableWrite();
-  startCommand(EEPROM_CAT25_COMMAND_WRITE, address);
+  startCommand(EEPROM_CAT25_COMMAND_WRITE, addr);
   while (len--) {
     _spi->transfer(*buf);
     buf++;
