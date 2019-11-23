@@ -243,6 +243,14 @@ size_t EEPROM_CAT25::writeOrUpdatePage(bool update, const uint32_t address, cons
   return(length);
 }
 
+size_t EEPROM_CAT25::capacity() {
+  return this->_capacity;
+}
+
+size_t EEPROM_CAT25::pageSize() {
+  return this->_pageSize;
+}
+
 void EEPROM_CAT25::startCommand(uint8_t command, const uint32_t address)
 {
   _spi->beginTransaction(_spiSettings);

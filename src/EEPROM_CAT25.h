@@ -194,6 +194,8 @@ class EEPROM_CAT25
     size_t updateBlock(uint32_t address, const size_t length, const void * const buffer);
     size_t writePage(const uint32_t address, const size_t length, const void * const buffer);
     size_t updatePage(const uint32_t address, const size_t length, const void * const buffer);
+    size_t capacity(void);
+    size_t pageSize(void);
 
   protected:
     void startCommand(uint8_t command, const uint32_t address);
