@@ -102,20 +102,7 @@ uint8_t EEPROM_CAT25::readByte(const uint32_t address)
 
 size_t EEPROM_CAT25::writeByte(const uint32_t address, const uint8_t byte)
 {
-  if (address >= _capacity) {
-    return(0);
-  }
-
-  if (!waitForReady()) {
-    return(0);
-  }
-
-  enableWrite();
-  startCommand(EEPROM_CAT25_COMMAND_WRITE, address);
-  _spi->transfer(byte);
-  endCommand();
-
-  return(1);
+  return writeBlock(address, sizeof(byte), &byte);
 }
 
 size_t EEPROM_CAT25::readBlock(const uint32_t address, const size_t length, void * const buffer)
