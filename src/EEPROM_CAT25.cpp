@@ -156,7 +156,9 @@ size_t EEPROM_CAT25::writeBlock(uint32_t address, const size_t length, const voi
     len -= _pageSize;
     address += _pageSize;
   }
-  writePage(address, len, buf);
+  if (len) {
+    writePage(address, len, buf);
+  }
 
   return(length);
 }
