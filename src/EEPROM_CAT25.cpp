@@ -243,11 +243,11 @@ size_t EEPROM_CAT25::writeOrUpdatePage(bool update, const uint32_t address, cons
   return(length);
 }
 
-size_t EEPROM_CAT25::capacity() {
+uint32_t EEPROM_CAT25::capacity() {
   return this->_capacity;
 }
 
-size_t EEPROM_CAT25::pageSize() {
+uint16_t EEPROM_CAT25::pageSize() {
   return this->_pageSize;
 }
 

@@ -35,8 +35,8 @@
 #endif
 
 struct EEPROM_CAT25_Device {
-  size_t capacity;
-  size_t pageSize;
+  uint32_t capacity;
+  uint16_t pageSize;
 };
 
 // On semi
@@ -194,8 +194,8 @@ class EEPROM_CAT25
     size_t updateBlock(uint32_t address, const size_t length, const void * const buffer);
     size_t writePage(const uint32_t address, const size_t length, const void * const buffer);
     size_t updatePage(const uint32_t address, const size_t length, const void * const buffer);
-    size_t capacity(void);
-    size_t pageSize(void);
+    uint32_t capacity(void);
+    uint16_t pageSize(void);
 
   protected:
     void startCommand(uint8_t command, const uint32_t address);
@@ -207,8 +207,8 @@ class EEPROM_CAT25
   private:
     SPIClass * _spi;
     SPISettings _spiSettings;
-    size_t _capacity;
-    size_t _pageSize;
+    uint32_t _capacity;
+    uint16_t _pageSize;
     uint8_t _chipSelect;
     uint32_t _clkSpeed;
 
