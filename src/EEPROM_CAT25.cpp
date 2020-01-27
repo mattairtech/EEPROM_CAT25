@@ -25,26 +25,10 @@
 
 #include "EEPROM_CAT25.h"
 
-EEPROM_CAT25::EEPROM_CAT25(SPIClass * spi, const uint8_t chipSelect, const EEPROM_CAT25_Device device)
+EEPROM_CAT25::EEPROM_CAT25(SPIClass * const spi, const uint8_t chipSelect, const EEPROM_CAT25_Device device)
 {
-  switch (device)
-  {
-    case CAT25M01: _capacity = EEPROM_CAPACITY_CAT25M01; _pageSize = EEPROM_PAGE_SIZE_CAT25M01; break;
-    case CAT25512: _capacity = EEPROM_CAPACITY_CAT25512; _pageSize = EEPROM_PAGE_SIZE_CAT25512; break;
-    case CAT25256: _capacity = EEPROM_CAPACITY_CAT25256; _pageSize = EEPROM_PAGE_SIZE_CAT25256; break;
-    case CAT25128: _capacity = EEPROM_CAPACITY_CAT25128; _pageSize = EEPROM_PAGE_SIZE_CAT25128; break;
-    case CAT25640: _capacity = EEPROM_CAPACITY_CAT25640; _pageSize = EEPROM_PAGE_SIZE_CAT25640; break;
-    case CAT25320: _capacity = EEPROM_CAPACITY_CAT25320; _pageSize = EEPROM_PAGE_SIZE_CAT25320; break;
-    case CAT25160: _capacity = EEPROM_CAPACITY_CAT25160; _pageSize = EEPROM_PAGE_SIZE_CAT25160; break;
-    case CAV25160: _capacity = EEPROM_CAPACITY_CAV25160; _pageSize = EEPROM_PAGE_SIZE_CAV25160; break;
-    case CAT25080: _capacity = EEPROM_CAPACITY_CAT25080; _pageSize = EEPROM_PAGE_SIZE_CAT25080; break;
-    case CAV25080: _capacity = EEPROM_CAPACITY_CAV25080; _pageSize = EEPROM_PAGE_SIZE_CAV25080; break;
-    case CAT25040: _capacity = EEPROM_CAPACITY_CAT25040; _pageSize = EEPROM_PAGE_SIZE_CAT25040; break;
-    case CAT25020: _capacity = EEPROM_CAPACITY_CAT25020; _pageSize = EEPROM_PAGE_SIZE_CAT25020; break;
-    case CAT25010: _capacity = EEPROM_CAPACITY_CAT25010; _pageSize = EEPROM_PAGE_SIZE_CAT25010; break;
-  }
-
-  _device = device;
+  _capacity = device.capacity;
+  _pageSize = device.pageSize;
   _spi = spi;
   _chipSelect = chipSelect;
   _spiSettings = SPISettings();	// use default settings
@@ -79,6 +63,18 @@ uint8_t EEPROM_CAT25::getStatusRegister(void)
   return(ret);
 }
 
+bool EEPROM_CAT25::setStatusRegister(uint8_t value) {
+  if (!waitForReady()) {
+    return false;
+  }
+  enableWrite();
+  startCommand(EEPROM_CAT25_COMMAND_WRSR, 0);
+  _spi->transfer(value);
+  endCommand();
+
+  return true;
+}
+
 bool EEPROM_CAT25::isReady(void)
 {
   if ((getStatusRegister() & EEPROM_CAT25_RDY_Msk) == EEPROM_CAT25_RDY_BUSY) {
@@ -105,8 +101,8 @@ uint8_t EEPROM_CAT25::readByte(const uint32_t address)
     return(0);
   }
 
-  while (!isReady()) {
-    yield();
+  if (!waitForReady()) {
+    return(0);
   }
 
   startCommand(EEPROM_CAT25_COMMAND_READ, address);
@@ -118,30 +114,22 @@ uint8_t EEPROM_CAT25::readByte(const uint32_t address)
 
 size_t EEPROM_CAT25::writeByte(const uint32_t address, const uint8_t byte)
 {
-  if (address >= _capacity) {
-    return(0);
-  }
-
-  while (!isReady()) {
-    yield();
-  }
-
-  enableWrite();
-  startCommand(EEPROM_CAT25_COMMAND_WRITE, address);
-  _spi->transfer(byte);
-  endCommand();
-
-  return(1);
+  return writeBlock(address, sizeof(byte), &byte);
 }
 
-size_t EEPROM_CAT25::readBlock(const uint32_t address, const size_t length, void * buffer)
+size_t EEPROM_CAT25::updateByte(const uint32_t address, const uint8_t byte)
+{
+  return updateBlock(address, sizeof(byte), &byte);
+}
+
+size_t EEPROM_CAT25::readBlock(const uint32_t address, const size_t length, void * const buffer)
 {
   if (length == 0 || (length + address) > _capacity) {
     return(0);
   }
 
-  while (!isReady()) {
-    yield();
+  if (!waitForReady()) {
+    return(0);
   }
 
   startCommand(EEPROM_CAT25_COMMAND_READ, address);
@@ -151,9 +139,19 @@ size_t EEPROM_CAT25::readBlock(const uint32_t address, const size_t length, void
   return(length);
 }
 
-size_t EEPROM_CAT25::writeBlock(uint32_t address, const size_t length, void * buffer)
+size_t EEPROM_CAT25::writeBlock(uint32_t address, const size_t length, const void * const buffer)
 {
-  uint8_t *buf = reinterpret_cast<uint8_t *>(buffer);
+  return writeOrUpdateBlock(false, address, length, buffer);
+}
+
+size_t EEPROM_CAT25::updateBlock(uint32_t address, const size_t length, const void * const buffer)
+{
+  return writeOrUpdateBlock(true, address, length, buffer);
+}
+
+size_t EEPROM_CAT25::writeOrUpdateBlock(bool update, uint32_t address, const size_t length, const void * const buffer)
+{
+  const uint8_t *buf = reinterpret_cast<const uint8_t *>(buffer);
   size_t len = length;
 
   if (length == 0 || (length + address) > _capacity) {
@@ -166,38 +164,88 @@ size_t EEPROM_CAT25::writeBlock(uint32_t address, const size_t length, void * bu
   }
 
   if (remainderFirstPage) {
-    writePage(address, remainderFirstPage, buf);
+    if (!writeOrUpdatePage(update, address, remainderFirstPage, buf)) {
+      return(0);
+    }
     buf += remainderFirstPage;
     len -= remainderFirstPage;
     address += remainderFirstPage;
   }
 
   while (len > _pageSize) {
-    writePage(address, _pageSize, buf);
+    if (!writeOrUpdatePage(update, address, _pageSize, buf)) {
+      return(0);
+    }
     buf += _pageSize;
     len -= _pageSize;
     address += _pageSize;
   }
-  writePage(address, len, buf);
+  if (len) {
+    if (!writeOrUpdatePage(update, address, len, buf)) {
+      return(0);
+    }
+  }
 
   return(length);
 }
 
-size_t EEPROM_CAT25::writePage(const uint32_t address, const size_t length, void * buffer)
+size_t EEPROM_CAT25::writePage(const uint32_t address, const size_t length, const void * const buffer)
 {
-  uint8_t *buf = reinterpret_cast<uint8_t *>(buffer);
+  return writeOrUpdatePage(false, address, length, buffer);
+}
+
+size_t EEPROM_CAT25::updatePage(const uint32_t address, const size_t length, const void * const buffer)
+{
+  return writeOrUpdatePage(true, address, length, buffer);
+}
+
+size_t EEPROM_CAT25::writeOrUpdatePage(bool update, const uint32_t address, const size_t length, const void * const buffer)
+{
+  const uint8_t *buf = reinterpret_cast<const uint8_t *>(buffer);
   size_t len = length;
+  uint32_t addr = address;
 
   if (address >= _capacity || length == 0 || length > (_pageSize - (address % _pageSize))) {
     return(0);
   }
 
-  while (!isReady()) {
-    yield();
+  if (!waitForReady()) {
+    return(0);
+  }
+
+  if (update) {
+    // To prevent writing bytes that are unchanged, read bytes and
+    // compare them, skipping any bytes that are unchanged. This only
+    // skips initial bytes. To skip all non-changed bytes, the page
+    // write might need to be split into multiple writes, which needs
+    // multiple write cycles so takes significantly longer (and, I
+    // guess, might even increase wear rather than decrease it?). You
+    // could also try to skip bytes from the end, which would not need
+    // an extra write cycle, but to do this efficiently, would require
+    // reading memory backwards, which the EEPROM does not support, or
+    // require reading all bytes to maybe discover the last one is
+    // changed and all should be written.
+    //
+    // Note that this does not use readBlock but runs the read command
+    // directly, to prevent allocating up to a full page of memory for
+    // the bytes read, and to allow ending the read as soon as we found
+    // a modified byte.
+    startCommand(EEPROM_CAT25_COMMAND_READ, address);
+    while (len) {
+      uint8_t value = _spi->transfer(0);
+      if (value != *buf)
+        break;
+      buf++;
+      addr++;
+      len--;
+    }
+    endCommand();
+    if (!len)
+      return(length);
   }
 
   enableWrite();
-  startCommand(EEPROM_CAT25_COMMAND_WRITE, address);
+  startCommand(EEPROM_CAT25_COMMAND_WRITE, addr);
   while (len--) {
     _spi->transfer(*buf);
     buf++;
@@ -207,12 +255,43 @@ size_t EEPROM_CAT25::writePage(const uint32_t address, const size_t length, void
   return(length);
 }
 
+uint32_t EEPROM_CAT25::capacity() {
+  return this->_capacity;
+}
+
+uint16_t EEPROM_CAT25::pageSize() {
+  return this->_pageSize;
+}
+
+bool EEPROM_CAT25::setWriteProtectEnable(bool enabled) {
+  uint8_t value = getStatusRegister();
+
+  if (enabled)
+    value |= EEPROM_CAT25_WPEN_ENABLE;
+  else
+    value &= ~EEPROM_CAT25_WPEN_ENABLE;
+  return setStatusRegister(value);
+}
+
+bool EEPROM_CAT25::setBlockProtect(uint8_t bp) {
+  // Check for invalid bits set in the value passed
+  if (bp & ~EEPROM_CAT25_BP_Msk)
+    return false;
+
+  uint8_t value = getStatusRegister();
+  value &= ~EEPROM_CAT25_BP_Msk;
+  value |= bp;
+
+  return setStatusRegister(value);
+}
+
+
 void EEPROM_CAT25::startCommand(uint8_t command, const uint32_t address)
 {
   _spi->beginTransaction(_spiSettings);
   digitalWrite(_chipSelect, LOW);
 
-  if (_device == CAT25040 && address >= 0x100) {
+  if (_capacity == 0x200 && address >= 0x100) {
     if (command == EEPROM_CAT25_COMMAND_READ) {
       command = EEPROM_CAT25_COMMAND_READ_A8_HIGH;
     } else if (command == EEPROM_CAT25_COMMAND_WRITE) {
@@ -233,7 +312,10 @@ void EEPROM_CAT25::sendAddressBytes(const uint32_t address)
     _spi->transfer((uint8_t)((address >> 16) & 0xFF));
   }
 
-  if ((_capacity > 0x100) && (_device != CAT25040)) {
+  // Note that 4kbit (0x200) EEPROMS need 9 bits, but put the upper bit
+  // in the command byte, so the second address byte is only used for
+  // 8kbit and larger.
+  if ((_capacity > 0x200)) {
     _spi->transfer((uint8_t)((address >> 8) & 0xFF));
   }
 
@@ -244,4 +326,19 @@ void EEPROM_CAT25::endCommand(void)
 {
   digitalWrite(_chipSelect, HIGH);
   _spi->endTransaction();
+}
+
+bool EEPROM_CAT25::waitForReady(void)
+{
+  uint32_t start = micros();
+  uint32_t timeout = EEPROM_CAT25_TIMEOUT_TIME_MS * 1000;
+  while (true) {
+    if (isReady()) {
+      return(true);
+    }
+    if (micros() - start > timeout) {
+      return(false);
+    }
+    yield();
+  }
 }
