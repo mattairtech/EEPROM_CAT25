@@ -197,12 +197,16 @@ class EEPROM_CAT25
     uint32_t capacity(void);
     uint16_t pageSize(void);
 
+    bool setWriteProtectEnable(bool enabled);
+    bool setBlockProtect(uint8_t bp);
+
   protected:
     void startCommand(uint8_t command, const uint32_t address);
     void endCommand(void);
     bool waitForReady(void);
     size_t writeOrUpdatePage(bool update, const uint32_t address, const size_t length, const void * const buffer);
     size_t writeOrUpdateBlock(bool update, uint32_t address, const size_t length, const void * const buffer);
+    bool setStatusRegister(uint8_t value);
 
   private:
     SPIClass * _spi;

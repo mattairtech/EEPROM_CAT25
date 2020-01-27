@@ -63,6 +63,18 @@ uint8_t EEPROM_CAT25::getStatusRegister(void)
   return(ret);
 }
 
+bool EEPROM_CAT25::setStatusRegister(uint8_t value) {
+  if (!waitForReady()) {
+    return false;
+  }
+  enableWrite();
+  startCommand(EEPROM_CAT25_COMMAND_WRSR, 0);
+  _spi->transfer(value);
+  endCommand();
+
+  return true;
+}
+
 bool EEPROM_CAT25::isReady(void)
 {
   if ((getStatusRegister() & EEPROM_CAT25_RDY_Msk) == EEPROM_CAT25_RDY_BUSY) {
@@ -250,6 +262,29 @@ uint32_t EEPROM_CAT25::capacity() {
 uint16_t EEPROM_CAT25::pageSize() {
   return this->_pageSize;
 }
+
+bool EEPROM_CAT25::setWriteProtectEnable(bool enabled) {
+  uint8_t value = getStatusRegister();
+
+  if (enabled)
+    value |= EEPROM_CAT25_WPEN_ENABLE;
+  else
+    value &= ~EEPROM_CAT25_WPEN_ENABLE;
+  return setStatusRegister(value);
+}
+
+bool EEPROM_CAT25::setBlockProtect(uint8_t bp) {
+  // Check for invalid bits set in the value passed
+  if (bp & ~EEPROM_CAT25_BP_Msk)
+    return false;
+
+  uint8_t value = getStatusRegister();
+  value &= ~EEPROM_CAT25_BP_Msk;
+  value |= bp;
+
+  return setStatusRegister(value);
+}
+
 
 void EEPROM_CAT25::startCommand(uint8_t command, const uint32_t address)
 {

@@ -201,11 +201,46 @@ one bit error in 4 data bytes. Therefore, when a single byte has to be written, 
 (including the ECC bits) are re−programmed. It is recommended to write in multiples of 4
 bytes in order to maximize the number of write cycles (if needed).
 
+## Block protection
+
+All devices support a feature called "Block Protection", which
+allows write-protecting (part of) the EEPROM using a few bits in the
+status register. The protection can be disabled, apply to the full
+EEPROM, or be applied to the upper quarter or half of the EEPROM:
+
+    bool ret EEPROM.setBlockProtect(EEPROM_CAT25_BP_NONE);
+    bool ret EEPROM.setBlockProtect(EEPROM_CAT25_BP_QUARTER);
+    bool ret EEPROM.setBlockProtect(EEPROM_CAT25_BP_HALF);
+    bool ret EEPROM.setBlockProtect(EEPROM_CAT25_BP_FULL);
+
+This function returns false if an error occurs (invalid argument or
+timeout waiting for the chip to be ready) or true otherwise.
+
+## Write protection
+
+In addition to block protection, most devices (except for the smallest
+ones) support additional write protection of the status register. This
+allows the block protection to become irreversible (or only reversible
+by flipping a pin).
+
+To enable the write protection bit in the status register, call:
+
+    EEPROM.setWriteProtectEnable(true);
+
+Note that the `WP` pin must additionally pulled low for the write
+protection to become effective (though the bit can be set before pulling
+`WP` low).
+
+To disable the write protection bit, call:
+
+    EEPROM.setWriteProtectEnable(false);
+
+Note that this is only possible when the write protection is not
+currently active (*i.e.* when `WP` is high).
 
 ## Possible Future Additions/Changes
 
 * Optimizations
-* Block Protection / WP pin support
 * Identification Page support
 * HOLD support?
 
